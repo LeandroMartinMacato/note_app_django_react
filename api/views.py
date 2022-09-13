@@ -6,6 +6,13 @@ from .serializers import NoteSerializer
 
 # Create your views here.
 
+#RESTFUL VERSION OF ROUTES
+# /notes GET
+# /notes POST
+# /notes/<id> GET
+# /notes/<id> PUT
+# /notes/<id> DELETE
+
 
 @api_view(['GET'])
 def getRoutes(requests):
@@ -62,6 +69,14 @@ def getNotes(requests):
 @api_view(['GET'])
 def getNote(request, pk):
     note = Note.objects.get(id=pk)
+    serializer = NoteSerializer(note, many=False)
+    return Response(serializer.data)
+
+
+@api_view(['POST', 'GET'])
+def createNote(request):
+    data = request.data
+    note = Note.objects.create(body=data['body'])
     serializer = NoteSerializer(note, many=False)
     return Response(serializer.data)
 

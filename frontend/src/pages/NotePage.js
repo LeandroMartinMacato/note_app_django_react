@@ -13,13 +13,15 @@ export default function NotePage() {
 	}, [noteId]);
 
 	let getNote = async () => {
-		let response = await fetch(`/api/note/${noteId.id}`);
+		if (noteId.id === "new") return;
+
+		let response = await fetch(`/api/notes/${noteId.id}/`);
 		let data = await response.json();
 		setNote(data);
 	};
 
 	let updateNote = async () => {
-		await fetch(`/api/note/${noteId.id}/update`, {
+		await fetch(`/api/notes/${noteId.id}/update/`, {
 			method: "PUT",
 			headers: {
 				"Content-Type": "application/json",
@@ -28,8 +30,18 @@ export default function NotePage() {
 		});
 	};
 
+	let createNote = async () => {
+		await fetch(`/api/notes/create/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(note),
+		});
+	};
+
 	let deleteNote = async () => {
-		await fetch(`/api/note/${noteId.id}/delete`, {
+		await fetch(`/api/notes/${noteId.id}/delete/`, {
 			method: "DELETE",
 			headers: {
 				"Content-Type": "application/json",
@@ -39,7 +51,13 @@ export default function NotePage() {
 	};
 
 	let handleSubmit = () => {
-		updateNote();
+		if (noteId.id !== "new" && note.body === "") {
+			deleteNote();
+		} else if (noteId.id !== "new") {
+			updateNote();
+		} else if (noteId.id === "new" && note.body !== null) {
+			createNote();
+		}
 		navigate("/");
 	};
 
@@ -49,13 +67,17 @@ export default function NotePage() {
 				<h3>
 					<ArrowLeft onClick={handleSubmit} />
 				</h3>
-				<button onClick={deleteNote}> Delete </button>
+				{noteId.id !== "new" ? (
+					<button onClick={deleteNote}> Delete </button>
+				) : (
+					<button onClick={handleSubmit}> Done </button>
+				)}
 			</div>
 			<textarea
 				onChange={(e) => {
 					setNote({ ...note, body: e.target.value }); //update state onChange
 				}}
-				defaultValue={note?.body}
+				value={note?.body}
 			></textarea>
 		</div>
 	);
